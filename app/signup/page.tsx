@@ -17,19 +17,6 @@ export default function SignupPage() {
     setLoading(true)
     setError(null)
 
-    const cleanEmail = email.trim()
-
-    console.log("RAW email:", JSON.stringify(email), "len:", email.length)
-    console.log("CLEAN email:", JSON.stringify(cleanEmail), "len:", cleanEmail.length)
-    console.log("CHAR CODES:", [...cleanEmail].map((c) => c.charCodeAt(0)))
-
-    
-    const cleanpassword = password.trim()
-
-    console.log("RAW email:", JSON.stringify(password), "len:", password.length)
-    console.log("CLEAN email:", JSON.stringify(cleanpassword), "len:", cleanpassword.length)
-    console.log("CHAR CODES:", [...cleanpassword].map((c) => c.charCodeAt(0)))
-
     const { data, error } = await supabase.auth.signUp({
       email,
       password,

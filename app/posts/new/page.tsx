@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "../../../components/AuthProvider"
 import { supabase } from "../../../lib/supabaseClient"
+
+const STORAGE_KEY = "new_post_draft"
 
 export default function NewPostPage() {
   const router = useRouter()
@@ -13,6 +15,34 @@ export default function NewPostPage() {
   const [content, setContent] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Load draft from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      try {
+        const draft = JSON.parse(saved)
+        setTitle(draft.title || "")
+        setLocation(draft.location || "")
+        setContent(draft.content || "")
+      } catch (err) {
+        console.error("Error loading draft:", err)
+      }
+    }
+  }, [])
+
+  // Save to localStorage whenever fields change
+  useEffect(() => {
+    if (title || location || content) {
+      const draft = { title, location, content }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
+    }
+  }, [title, location, content])
+
+  // Clear localStorage on successful submit
+  const clearDraft = () => {
+    localStorage.removeItem(STORAGE_KEY)
+  }
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,6 +89,7 @@ export default function NewPostPage() {
         return
       }
 
+      clearDraft()
       router.push("/posts")
     } catch (err) {
       console.error("Error creating post:", err)
@@ -144,7 +175,11 @@ export default function NewPostPage() {
           </button>
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => {
+              if (confirm("Are you sure you want to cancel? Your draft will be saved.")) {
+                router.back()
+              }
+            }}
             className="rounded border px-6 py-2 hover:bg-gray-50"
           >
             Cancel
