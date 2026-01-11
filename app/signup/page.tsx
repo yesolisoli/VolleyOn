@@ -17,6 +17,7 @@ export default function SignupPage() {
     setLoading(true)
     setError(null)
 
+    // Sign up user
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -25,12 +26,37 @@ export default function SignupPage() {
       },
     })
 
-    setLoading(false)
-
     if (error) {
+      setLoading(false)
       setError(error.message)
       return
     }
+
+    // Profile will be created automatically by trigger
+    // But if we have a session, we can also create it manually as backup
+    if (data.user) {
+      try {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: data.user.id,
+              nickname: nickname.trim(),
+              email: email.trim(),
+            },
+          ])
+          .select()
+
+        if (profileError && profileError.code !== "23505") {
+          // 23505 is unique violation, which is OK (trigger might have created it)
+          console.error("Error creating profile:", profileError)
+        }
+      } catch (err) {
+        console.error("Error creating profile:", err)
+      }
+    }
+
+    setLoading(false)
 
     // 이메일 확인 설정에 따라 session이 바로 생기기도/안 생기기도 함
     router.push("/")

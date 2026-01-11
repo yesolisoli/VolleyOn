@@ -20,13 +20,17 @@ type Post = {
   views: number
 }
 
+type PostWithNickname = Post & {
+  author_nickname: string | null
+}
+
 export default function PostDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { session } = useAuth()
   const postId = params.id as string
 
-  const [post, setPost] = useState<Post | null>(null)
+  const [post, setPost] = useState<PostWithNickname | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -55,7 +59,23 @@ export default function PostDetailPage() {
       }
 
       if (data) {
-        setPost(data)
+        // Fetch profile for the author
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("nickname")
+          .eq("id", data.author_id)
+          .single()
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError)
+        }
+
+        const postWithNickname: PostWithNickname = {
+          ...data,
+          author_nickname: profile?.nickname || null,
+        }
+
+        setPost(postWithNickname)
 
         // Increment view count
         await supabase
@@ -96,6 +116,10 @@ export default function PostDetailPage() {
     }
   }
 
+  const getAuthorName = (post: PostWithNickname): string => {
+    return post.author_nickname || post.author_email
+  }
+
   if (loading) {
     return (
       <div className="mx-auto max-w-3xl">
@@ -104,11 +128,11 @@ export default function PostDetailPage() {
     )
   }
 
-  if (error || !post) {
+  if (error) {
     return (
       <div className="mx-auto max-w-3xl">
         <div className="rounded-lg border p-6 text-center">
-          <p className="text-lg text-gray-600">{error || "Post not found"}</p>
+          <p className="text-lg text-red-600">{error}</p>
           <Link
             href="/posts"
             className="mt-4 inline-block text-blue-600 hover:underline"
@@ -120,10 +144,18 @@ export default function PostDetailPage() {
     )
   }
 
+  if (!post) {
+    return (
+      <div className="mx-auto max-w-3xl">
+        <p>Post not found.</p>
+      </div>
+    )
+  }
+
   const isAuthor = session?.user?.id === post.author_id
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-3xl">
       <div className="mb-6">
         <Link
           href="/posts"
@@ -136,11 +168,11 @@ export default function PostDetailPage() {
       <article className="rounded-lg border bg-white p-8 shadow-sm">
         <header className="mb-6 border-b pb-6">
           <h1 className="mb-4 text-3xl font-bold leading-tight">{post.title}</h1>
-          
+
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="text-sm">
               <span className="font-semibold text-gray-700">Author</span>
-              <p className="mt-1 text-gray-600">{post.author_email}</p>
+              <p className="mt-1 text-gray-600">{getAuthorName(post)}</p>
             </div>
             <div className="text-sm">
               <span className="font-semibold text-gray-700">Date</span>
@@ -165,7 +197,7 @@ export default function PostDetailPage() {
           {post.content}
         </div>
 
-        {post.location && (
+        {post.location && (post.location_lat && post.location_lng) && (
           <div className="mb-8">
             <h2 className="mb-3 text-lg font-semibold">Location</h2>
             <LeafletMapDisplay

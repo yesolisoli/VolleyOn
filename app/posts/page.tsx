@@ -7,13 +7,18 @@ import { supabase } from "../../lib/supabaseClient"
 type Post = {
   id: string
   title: string
+  author_id: string
   author_email: string
   created_at: string
   views: number
 }
 
+type PostWithNickname = Post & {
+  author_nickname: string | null
+}
+
 export default function PostsPage() {
-  const [posts, setPosts] = useState<Post[]>([])
+  const [posts, setPosts] = useState<PostWithNickname[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -33,12 +38,42 @@ export default function PostsPage() {
         return
       }
 
-      setPosts(data || [])
+      if (data && data.length > 0) {
+        // Get unique author IDs
+        const authorIds = [...new Set(data.map((post) => post.author_id))]
+
+        // Fetch profiles for all authors
+        const { data: profiles, error: profilesError } = await supabase
+          .from("profiles")
+          .select("id, nickname")
+          .in("id", authorIds)
+
+        if (profilesError) {
+          console.error("Error fetching profiles:", profilesError)
+        }
+
+        // Map posts with nicknames
+        const postsWithNicknames: PostWithNickname[] = data.map((post) => {
+          const profile = profiles?.find((p) => p.id === post.author_id)
+          return {
+            ...post,
+            author_nickname: profile?.nickname || null,
+          }
+        })
+
+        setPosts(postsWithNicknames)
+      } else {
+        setPosts([])
+      }
     } catch (error) {
       console.error("Error fetching posts:", error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const getAuthorName = (post: PostWithNickname): string => {
+    return post.author_nickname || post.author_email
   }
 
   return (
@@ -76,7 +111,7 @@ export default function PostsPage() {
                     {post.title}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-sm">{post.author_email}</td>
+                <td className="px-4 py-3 text-sm">{getAuthorName(post)}</td>
                 <td className="px-4 py-3 text-sm">
                   {new Date(post.created_at).toLocaleDateString()}
                 </td>
