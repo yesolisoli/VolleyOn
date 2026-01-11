@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "../../../components/AuthProvider"
 import { supabase } from "../../../lib/supabaseClient"
+import LeafletMapInput from "../../../components/LeafletMapInput"
 
 const STORAGE_KEY = "new_post_draft"
 
@@ -138,13 +139,12 @@ export default function NewPostPage() {
           <label htmlFor="location" className="mb-2 block text-sm font-semibold">
             Location
           </label>
-          <input
-            id="location"
-            type="text"
-            className="w-full rounded border p-3"
+          <LeafletMapInput
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Enter location (e.g., Central Park, NYC)"
+            onChange={setLocation}
+            onLocationSelect={(loc) => {
+              setLocation(loc.address)
+            }}
           />
         </div>
 

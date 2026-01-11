@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "../../../../lib/supabaseClient"
 import { useAuth } from "../../../../components/AuthProvider"
+import LeafletMapInput from "../../../../components/LeafletMapInput"
 
 type Post = {
   id: string
@@ -264,13 +265,12 @@ export default function EditPostPage() {
           <label htmlFor="location" className="mb-2 block text-sm font-semibold">
             Location
           </label>
-          <input
-            id="location"
-            type="text"
-            className="w-full rounded-md border border-gray-300 p-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <LeafletMapInput
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Enter location (e.g., Central Park, NYC)"
+            onChange={setLocation}
+            onLocationSelect={(loc) => {
+              setLocation(loc.address)
+            }}
           />
         </div>
 

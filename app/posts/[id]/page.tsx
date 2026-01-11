@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "../../../lib/supabaseClient"
 import { useAuth } from "../../../components/AuthProvider"
+import LeafletMapDisplay, { getShortLocationName } from "../../../components/LeafletMapDisplay"
 
 type Post = {
   id: string
@@ -152,7 +153,7 @@ export default function PostDetailPage() {
             {post.location && (
               <div className="text-sm">
                 <span className="font-semibold text-gray-700">Location</span>
-                <p className="mt-1 text-gray-600">{post.location}</p>
+                <p className="mt-1 text-gray-600">{getShortLocationName(post.location)}</p>
               </div>
             )}
           </div>
@@ -161,6 +162,14 @@ export default function PostDetailPage() {
         <div className="mb-8 whitespace-pre-wrap text-gray-900 leading-7">
           {post.content}
         </div>
+
+        {post.location && (
+          <div className="mb-8">
+            <h2 className="mb-3 text-lg font-semibold">Location</h2>
+            <LeafletMapDisplay location={post.location} height="h-96" />
+            <p className="mt-2 text-sm text-gray-600">{getShortLocationName(post.location)}</p>
+          </div>
+        )}
 
         {isAuthor && (
           <div className="flex gap-3 border-t pt-6">
