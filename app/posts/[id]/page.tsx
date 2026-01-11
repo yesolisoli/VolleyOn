@@ -11,6 +11,8 @@ type Post = {
   id: string
   title: string
   location: string | null
+  location_lat: number | null
+  location_lng: number | null
   content: string
   author_id: string
   author_email: string
@@ -166,7 +168,12 @@ export default function PostDetailPage() {
         {post.location && (
           <div className="mb-8">
             <h2 className="mb-3 text-lg font-semibold">Location</h2>
-            <LeafletMapDisplay location={post.location} height="h-96" />
+            <LeafletMapDisplay
+              location={post.location}
+              lat={post.location_lat}
+              lng={post.location_lng}
+              height="h-96"
+            />
             <p className="mt-2 text-sm text-gray-600">{getShortLocationName(post.location)}</p>
           </div>
         )}

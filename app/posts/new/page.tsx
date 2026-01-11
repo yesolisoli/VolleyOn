@@ -13,6 +13,8 @@ export default function NewPostPage() {
   const { session, loading } = useAuth()
   const [title, setTitle] = useState("")
   const [location, setLocation] = useState("")
+  const [locationLat, setLocationLat] = useState<number | null>(null)
+  const [locationLng, setLocationLng] = useState<number | null>(null)
   const [content, setContent] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -25,6 +27,8 @@ export default function NewPostPage() {
         const draft = JSON.parse(saved)
         setTitle(draft.title || "")
         setLocation(draft.location || "")
+        setLocationLat(draft.locationLat || null)
+        setLocationLng(draft.locationLng || null)
         setContent(draft.content || "")
       } catch (err) {
         console.error("Error loading draft:", err)
@@ -35,10 +39,10 @@ export default function NewPostPage() {
   // Save to localStorage whenever fields change
   useEffect(() => {
     if (title || location || content) {
-      const draft = { title, location, content }
+      const draft = { title, location, locationLat, locationLng, content }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
     }
-  }, [title, location, content])
+  }, [title, location, locationLat, locationLng, content])
 
   // Clear localStorage on successful submit
   const clearDraft = () => {
@@ -75,6 +79,8 @@ export default function NewPostPage() {
           {
             title: title.trim(),
             location: location.trim() || null,
+            location_lat: locationLat,
+            location_lng: locationLng,
             content: content.trim(),
             author_id: session.user.id,
             author_email: session.user.email,
@@ -144,6 +150,8 @@ export default function NewPostPage() {
             onChange={setLocation}
             onLocationSelect={(loc) => {
               setLocation(loc.address)
+              setLocationLat(loc.lat)
+              setLocationLng(loc.lng)
             }}
           />
         </div>

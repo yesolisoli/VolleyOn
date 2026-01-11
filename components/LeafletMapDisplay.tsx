@@ -22,6 +22,8 @@ import "leaflet/dist/leaflet.css"
 
 type LeafletMapDisplayProps = {
   location: string
+  lat?: number | null
+  lng?: number | null
   height?: string
 }
 
@@ -43,6 +45,8 @@ const getShortLocationName = (address: string): string => {
 
 export default function LeafletMapDisplay({
   location,
+  lat,
+  lng,
   height = "h-64",
 }: LeafletMapDisplayProps) {
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null)
@@ -65,8 +69,11 @@ export default function LeafletMapDisplay({
       })
     }
 
-    // Geocode location on mount
-    if (location) {
+    // Use stored coordinates if available, otherwise geocode
+    if (lat !== null && lat !== undefined && lng !== null && lng !== undefined) {
+      setPosition({ lat, lng })
+    } else if (location) {
+      // Fallback to geocoding if coordinates not available
       const geocodeLocation = async () => {
         try {
           const response = await fetch(
@@ -81,9 +88,9 @@ export default function LeafletMapDisplay({
           )
           const data = await response.json()
           if (data && data.length > 0) {
-            const lat = parseFloat(data[0].lat)
-            const lng = parseFloat(data[0].lon)
-            setPosition({ lat, lng })
+            const geocodedLat = parseFloat(data[0].lat)
+            const geocodedLng = parseFloat(data[0].lon)
+            setPosition({ lat: geocodedLat, lng: geocodedLng })
           }
         } catch (error) {
           console.error("Error geocoding location:", error)
@@ -91,7 +98,7 @@ export default function LeafletMapDisplay({
       }
       geocodeLocation()
     }
-  }, [location])
+  }, [location, lat, lng])
 
   if (!mounted || !position) {
     return (

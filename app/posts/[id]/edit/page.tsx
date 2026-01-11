@@ -11,6 +11,8 @@ type Post = {
   id: string
   title: string
   location: string | null
+  location_lat: number | null
+  location_lng: number | null
   content: string
   author_id: string
   author_email: string
@@ -29,6 +31,8 @@ export default function EditPostPage() {
   const [post, setPost] = useState<Post | null>(null)
   const [title, setTitle] = useState("")
   const [location, setLocation] = useState("")
+  const [locationLat, setLocationLat] = useState<number | null>(null)
+  const [locationLng, setLocationLng] = useState<number | null>(null)
   const [content, setContent] = useState("")
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -53,6 +57,8 @@ export default function EditPostPage() {
         if (isInitialLoad && !post) {
           setTitle(draft.title || "")
           setLocation(draft.location || "")
+          setLocationLat(draft.locationLat || null)
+          setLocationLng(draft.locationLng || null)
           setContent(draft.content || "")
         }
       } catch (err) {
@@ -66,7 +72,7 @@ export default function EditPostPage() {
     if (!postId || !post || isInitialLoad) return
     const storageKey = getStorageKey(postId)
     if (title || location || content) {
-      const draft = { title, location, content }
+      const draft = { title, location, locationLat, locationLng, content }
       localStorage.setItem(storageKey, JSON.stringify(draft))
     }
   }, [title, location, content, postId, post, isInitialLoad])
@@ -114,15 +120,21 @@ export default function EditPostPage() {
             // Use draft if it exists, otherwise use server data
             setTitle(draft.title || data.title)
             setLocation(draft.location || data.location || "")
+            setLocationLat(draft.locationLat || data.location_lat || null)
+            setLocationLng(draft.locationLng || data.location_lng || null)
             setContent(draft.content || data.content)
           } catch (err) {
             setTitle(data.title)
             setLocation(data.location || "")
+            setLocationLat(data.location_lat || null)
+            setLocationLng(data.location_lng || null)
             setContent(data.content)
           }
         } else {
           setTitle(data.title)
           setLocation(data.location || "")
+          setLocationLat(data.location_lat || null)
+          setLocationLng(data.location_lng || null)
           setContent(data.content)
         }
         setIsInitialLoad(false)
@@ -164,6 +176,8 @@ export default function EditPostPage() {
         .update({
           title: title.trim(),
           location: location.trim() || null,
+          location_lat: locationLat,
+          location_lng: locationLng,
           content: content.trim(),
         })
         .eq("id", postId)
@@ -270,6 +284,8 @@ export default function EditPostPage() {
             onChange={setLocation}
             onLocationSelect={(loc) => {
               setLocation(loc.address)
+              setLocationLat(loc.lat)
+              setLocationLng(loc.lng)
             }}
           />
         </div>
