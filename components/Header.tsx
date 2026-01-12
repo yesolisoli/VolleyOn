@@ -64,16 +64,16 @@ export default function Header() {
   const displayName = nickname || session?.user?.email || "User"
 
   return (
-    <header className="relative z-50 border-b bg-white">
-      <nav className="mx-auto flex max-w-5xl items-center justify-between p-4">
-        <Link href="/" className="font-bold">
-          Volleyball Community
+    <header className="relative z-[1000] border-b bg-white">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between py-4">
+        <Link href="/" className="flex items-center gap-1 text-xl font-bold">
+          <span>VolleyOn</span>
+          <span className="text-2xl">🏐</span>
         </Link>
 
         <div className="flex items-center gap-4">
           <Link href="/posts">Posts</Link>
-          <Link href="/games">Games</Link>
-          <Link href="/map">Map</Link>
+          {session && <Link href="/chats">Chats</Link>}
 
           {!loading && !session && (
             <>
@@ -112,8 +112,8 @@ export default function Header() {
                 </span>
               </button>
 
-                     {dropdownOpen && (
-                       <div className="absolute right-0 z-50 mt-2 w-48 rounded-md border bg-white shadow-lg">
+              {dropdownOpen && (
+                <div className="absolute right-0 z-[1001] mt-2 w-48 rounded-md border bg-white shadow-lg">
                   <div className="py-1">
                     <div className="border-b px-4 py-2">
                       <p className="text-sm font-semibold text-gray-900">

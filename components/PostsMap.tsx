@@ -146,35 +146,35 @@ export default function PostsMap() {
     }
   }
 
-  if (!mounted) {
-    return (
-      <div className="h-[600px] w-full overflow-hidden rounded-lg border bg-gray-50">
-        <div className="flex h-full items-center justify-center">
-          <p className="text-gray-500">Loading map...</p>
-        </div>
-      </div>
-    )
-  }
+        if (!mounted) {
+          return (
+            <div className="h-[300px] w-full overflow-hidden rounded-lg border bg-gray-50">
+              <div className="flex h-full items-center justify-center">
+                <p className="text-gray-500">Loading map...</p>
+              </div>
+            </div>
+          )
+        }
 
-  if (loading) {
-    return (
-      <div className="h-[600px] w-full overflow-hidden rounded-lg border bg-gray-50">
-        <div className="flex h-full items-center justify-center">
-          <p className="text-gray-500">Loading posts...</p>
-        </div>
-      </div>
-    )
-  }
+        if (loading) {
+          return (
+            <div className="h-[300px] w-full overflow-hidden rounded-lg border bg-gray-50">
+              <div className="flex h-full items-center justify-center">
+                <p className="text-gray-500">Loading posts...</p>
+              </div>
+            </div>
+          )
+        }
 
-  if (markers.length === 0) {
-    return (
-      <div className="h-[600px] w-full overflow-hidden rounded-lg border bg-gray-50">
-        <div className="flex h-full items-center justify-center">
-          <p className="text-gray-500">No posts with locations yet.</p>
-        </div>
-      </div>
-    )
-  }
+        if (markers.length === 0) {
+          return (
+            <div className="h-[300px] w-full overflow-hidden rounded-lg border bg-gray-50">
+              <div className="flex h-full items-center justify-center">
+                <p className="text-gray-500">No posts with locations yet.</p>
+              </div>
+            </div>
+          )
+        }
 
   // Calculate center point (average of all markers)
   const centerLat =
@@ -202,8 +202,8 @@ export default function PostsMap() {
     return 10 // Very far apart
   }
 
-  return (
-    <div className="h-[600px] w-full overflow-hidden rounded-lg border">
+        return (
+          <div className="h-[300px] w-full overflow-hidden rounded-lg border">
       <MapContainer
         center={[centerLat, centerLng]}
         zoom={calculateZoom()}

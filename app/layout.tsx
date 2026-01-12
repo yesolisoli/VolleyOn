@@ -9,7 +9,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <AuthProvider>
           <Header />
-          <main className="min-h-screen p-4">{children}</main>
+          <main className="min-h-screen py-4">{children}</main>
           <Footer />
         </AuthProvider>
       </body>
