@@ -15,6 +15,9 @@ export default function NewPostPage() {
   const [location, setLocation] = useState("")
   const [locationLat, setLocationLat] = useState<number | null>(null)
   const [locationLng, setLocationLng] = useState<number | null>(null)
+  const [eventDate, setEventDate] = useState("")
+  const [eventTime, setEventTime] = useState("")
+  const [tag, setTag] = useState("")
   const [content, setContent] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -29,6 +32,9 @@ export default function NewPostPage() {
         setLocation(draft.location || "")
         setLocationLat(draft.locationLat || null)
         setLocationLng(draft.locationLng || null)
+        setEventDate(draft.eventDate || "")
+        setEventTime(draft.eventTime || "")
+        setTag(draft.tag || "")
         setContent(draft.content || "")
       } catch (err) {
         console.error("Error loading draft:", err)
@@ -38,11 +44,11 @@ export default function NewPostPage() {
 
   // Save to localStorage whenever fields change
   useEffect(() => {
-    if (title || location || content) {
-      const draft = { title, location, locationLat, locationLng, content }
+    if (title || location || content || eventDate || eventTime || tag) {
+      const draft = { title, location, locationLat, locationLng, eventDate, eventTime, tag, content }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
     }
-  }, [title, location, locationLat, locationLng, content])
+  }, [title, location, locationLat, locationLng, eventDate, eventTime, tag, content])
 
   // Clear localStorage on successful submit
   const clearDraft = () => {
@@ -81,6 +87,9 @@ export default function NewPostPage() {
             location: location.trim() || null,
             location_lat: locationLat,
             location_lng: locationLng,
+            event_date: eventDate || null,
+            event_time: eventTime || null,
+            tag: tag || null,
             content: content.trim(),
             author_id: session.user.id,
             author_email: session.user.email,
@@ -141,19 +150,68 @@ export default function NewPostPage() {
           />
         </div>
 
+              <div>
+                <label htmlFor="location" className="mb-2 block text-sm font-semibold">
+                  Location
+                </label>
+                <LeafletMapInput
+                  value={location}
+                  onChange={setLocation}
+                  onLocationSelect={(loc) => {
+                    setLocation(loc.address)
+                    setLocationLat(loc.lat)
+                    setLocationLng(loc.lng)
+                  }}
+                />
+              </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="eventDate" className="mb-2 block text-sm font-semibold">
+              Event Date
+            </label>
+            <input
+              id="eventDate"
+              type="date"
+              className="w-full rounded border p-3"
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="eventTime" className="mb-2 block text-sm font-semibold">
+              Event Time
+            </label>
+            <input
+              id="eventTime"
+              type="time"
+              className="w-full rounded border p-3"
+              value={eventTime}
+              onChange={(e) => setEventTime(e.target.value)}
+            />
+          </div>
+        </div>
+
         <div>
-          <label htmlFor="location" className="mb-2 block text-sm font-semibold">
-            Location
+          <label htmlFor="tag" className="mb-2 block text-sm font-semibold">
+            Tag
           </label>
-          <LeafletMapInput
-            value={location}
-            onChange={setLocation}
-            onLocationSelect={(loc) => {
-              setLocation(loc.address)
-              setLocationLat(loc.lat)
-              setLocationLng(loc.lng)
-            }}
-          />
+          <select
+            id="tag"
+            className="w-full rounded border p-3"
+            value={tag}
+            onChange={(e) => setTag(e.target.value)}
+          >
+            <option value="">Select a tag</option>
+            <option value="Recruiting">#Recruiting</option>
+            <option value="Team Introduction">#Team Introduction</option>
+            <option value="Indoor">#Indoor</option>
+            <option value="Beach">#Beach</option>
+            <option value="Grass">#Grass</option>
+            <option value="Clinic">#Clinic</option>
+            <option value="Chat">#Chat</option>
+            <option value="Tips/Lecture">#Tips/Lecture</option>
+          </select>
         </div>
 
         <div>

@@ -13,6 +13,9 @@ type Post = {
   location: string | null
   location_lat: number | null
   location_lng: number | null
+  event_date: string | null
+  event_time: string | null
+  tag: string | null
   content: string
   author_id: string
   author_email: string
@@ -33,6 +36,9 @@ export default function EditPostPage() {
   const [location, setLocation] = useState("")
   const [locationLat, setLocationLat] = useState<number | null>(null)
   const [locationLng, setLocationLng] = useState<number | null>(null)
+  const [eventDate, setEventDate] = useState("")
+  const [eventTime, setEventTime] = useState("")
+  const [tag, setTag] = useState("")
   const [content, setContent] = useState("")
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -59,6 +65,9 @@ export default function EditPostPage() {
           setLocation(draft.location || "")
           setLocationLat(draft.locationLat || null)
           setLocationLng(draft.locationLng || null)
+          setEventDate(draft.eventDate || "")
+          setEventTime(draft.eventTime || "")
+          setTag(draft.tag || "")
           setContent(draft.content || "")
         }
       } catch (err) {
@@ -71,11 +80,11 @@ export default function EditPostPage() {
   useEffect(() => {
     if (!postId || !post || isInitialLoad) return
     const storageKey = getStorageKey(postId)
-    if (title || location || content) {
-      const draft = { title, location, locationLat, locationLng, content }
+    if (title || location || content || eventDate || eventTime || tag) {
+      const draft = { title, location, locationLat, locationLng, eventDate, eventTime, tag, content }
       localStorage.setItem(storageKey, JSON.stringify(draft))
     }
-  }, [title, location, content, postId, post, isInitialLoad])
+  }, [title, location, locationLat, locationLng, eventDate, eventTime, tag, content, postId, post, isInitialLoad])
 
   // Clear draft on successful submit
   const clearDraft = () => {
@@ -122,12 +131,16 @@ export default function EditPostPage() {
             setLocation(draft.location || data.location || "")
             setLocationLat(draft.locationLat || data.location_lat || null)
             setLocationLng(draft.locationLng || data.location_lng || null)
+            setEventDate(draft.eventDate || data.event_date || "")
+            setEventTime(draft.eventTime || data.event_time || "")
             setContent(draft.content || data.content)
           } catch (err) {
             setTitle(data.title)
             setLocation(data.location || "")
             setLocationLat(data.location_lat || null)
             setLocationLng(data.location_lng || null)
+            setEventDate(data.event_date || "")
+            setEventTime(data.event_time || "")
             setContent(data.content)
           }
         } else {
@@ -135,6 +148,8 @@ export default function EditPostPage() {
           setLocation(data.location || "")
           setLocationLat(data.location_lat || null)
           setLocationLng(data.location_lng || null)
+          setEventDate(data.event_date || "")
+          setEventTime(data.event_time || "")
           setContent(data.content)
         }
         setIsInitialLoad(false)
@@ -178,6 +193,9 @@ export default function EditPostPage() {
           location: location.trim() || null,
           location_lat: locationLat,
           location_lng: locationLng,
+          event_date: eventDate || null,
+          event_time: eventTime || null,
+          tag: tag || null,
           content: content.trim(),
         })
         .eq("id", postId)
@@ -288,6 +306,55 @@ export default function EditPostPage() {
               setLocationLng(loc.lng)
             }}
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="eventDate" className="mb-2 block text-sm font-semibold">
+              Event Date
+            </label>
+            <input
+              id="eventDate"
+              type="date"
+              className="w-full rounded-md border border-gray-300 p-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="eventTime" className="mb-2 block text-sm font-semibold">
+              Event Time
+            </label>
+            <input
+              id="eventTime"
+              type="time"
+              className="w-full rounded-md border border-gray-300 p-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={eventTime}
+              onChange={(e) => setEventTime(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="tag" className="mb-2 block text-sm font-semibold">
+            Tag
+          </label>
+          <select
+            id="tag"
+            className="w-full rounded-md border border-gray-300 p-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={tag}
+            onChange={(e) => setTag(e.target.value)}
+          >
+            <option value="">Select a tag</option>
+            <option value="Recruiting">#Recruiting</option>
+            <option value="Team Introduction">#Team Introduction</option>
+            <option value="Indoor">#Indoor</option>
+            <option value="Beach">#Beach</option>
+            <option value="Grass">#Grass</option>
+            <option value="Clinic">#Clinic</option>
+            <option value="Chat">#Chat</option>
+            <option value="Tips/Lecture">#Tips/Lecture</option>
+          </select>
         </div>
 
         <div>

@@ -13,6 +13,9 @@ type Post = {
   location: string | null
   location_lat: number | null
   location_lng: number | null
+  event_date: string | null
+  event_time: string | null
+  tag: string | null
   content: string
   author_id: string
   author_email: string
@@ -167,30 +170,52 @@ export default function PostDetailPage() {
 
       <article className="rounded-lg border bg-white p-8 shadow-sm">
         <header className="mb-6 border-b pb-6">
-          <h1 className="mb-4 text-3xl font-bold leading-tight">{post.title}</h1>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="text-sm">
-              <span className="font-semibold text-gray-700">Author</span>
-              <p className="mt-1 text-gray-600">{getAuthorName(post)}</p>
-            </div>
-            <div className="text-sm">
-              <span className="font-semibold text-gray-700">Date</span>
-              <p className="mt-1 text-gray-600">
-                {new Date(post.created_at).toLocaleDateString()}
-              </p>
-            </div>
-            <div className="text-sm">
-              <span className="font-semibold text-gray-700">Views</span>
-              <p className="mt-1 text-gray-600">{post.views}</p>
-            </div>
-            {post.location && (
-              <div className="text-sm">
-                <span className="font-semibold text-gray-700">Location</span>
-                <p className="mt-1 text-gray-600">{getShortLocationName(post.location)}</p>
-              </div>
+          <div className="mb-4 flex items-center gap-3">
+            <h1 className="text-3xl font-bold leading-tight">{post.title}</h1>
+            {post.tag && (
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+                #{post.tag}
+              </span>
             )}
           </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                   <div className="text-sm">
+                     <span className="font-semibold text-gray-700">Author</span>
+                     <p className="mt-1 text-gray-600">{getAuthorName(post)}</p>
+                   </div>
+                   <div className="text-sm">
+                     <span className="font-semibold text-gray-700">Created</span>
+                     <p className="mt-1 text-gray-600">
+                       {new Date(post.created_at).toLocaleDateString()}
+                     </p>
+                   </div>
+                   <div className="text-sm">
+                     <span className="font-semibold text-gray-700">Views</span>
+                     <p className="mt-1 text-gray-600">{post.views}</p>
+                   </div>
+                   {post.location && (
+                     <div className="text-sm">
+                       <span className="font-semibold text-gray-700">Location</span>
+                       <p className="mt-1 text-gray-600">{getShortLocationName(post.location)}</p>
+                     </div>
+                   )}
+                 </div>
+                 {(post.event_date || post.event_time) && (
+                   <div className="mt-4 rounded-lg bg-blue-50 p-4">
+                     <div className="text-sm">
+                       <span className="font-semibold text-gray-700">Event Date & Time</span>
+                       <p className="mt-1 text-gray-900">
+                         {post.event_date && new Date(post.event_date).toLocaleDateString()}
+                         {post.event_date && post.event_time && " at "}
+                         {post.event_time && new Date(`2000-01-01T${post.event_time}`).toLocaleTimeString("en-US", {
+                           hour: "numeric",
+                           minute: "2-digit",
+                         })}
+                       </p>
+                     </div>
+                   </div>
+                 )}
         </header>
 
         <div className="mb-8 whitespace-pre-wrap text-gray-900 leading-7">
