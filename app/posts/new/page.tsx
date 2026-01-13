@@ -19,6 +19,9 @@ export default function NewPostPage() {
   const [eventTime, setEventTime] = useState("")
   const [tag, setTag] = useState("")
   const [content, setContent] = useState("")
+  const [files, setFiles] = useState<File[]>([])
+  const [filePreviews, setFilePreviews] = useState<string[]>([])
+  const [uploadingFiles, setUploadingFiles] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,6 +44,75 @@ export default function NewPostPage() {
       }
     }
   }, [])
+
+  // Handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || [])
+    
+    // Validate file sizes (max 10MB per file)
+    const validFiles = selectedFiles.filter((file) => {
+      if (file.size > 10 * 1024 * 1024) {
+        setError(`File ${file.name} is too large. Maximum size is 10MB.`)
+        return false
+      }
+      return true
+    })
+
+    setFiles((prev) => [...prev, ...validFiles])
+
+    // Create previews for images
+    validFiles.forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setFilePreviews((prev) => [...prev, reader.result as string])
+        }
+        reader.readAsDataURL(file)
+      }
+    })
+  }
+
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index))
+    setFilePreviews((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const uploadFiles = async (postId: string): Promise<string[]> => {
+    if (files.length === 0) return []
+
+    const uploadedUrls: string[] = []
+
+    for (const file of files) {
+      try {
+        const fileExt = file.name.split(".").pop()
+        const fileName = `${session!.user.id}-${Date.now()}-${file.name}`
+        const filePath = `${postId}/${fileName}`
+
+        const { error: uploadError } = await supabase.storage
+          .from("post-attachments")
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: false,
+          })
+
+        if (uploadError) {
+          console.error("Error uploading file:", uploadError)
+          throw uploadError
+        }
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("post-attachments").getPublicUrl(filePath)
+
+        uploadedUrls.push(publicUrl)
+      } catch (error) {
+        console.error("Error uploading file:", error)
+        throw error
+      }
+    }
+
+    return uploadedUrls
+  }
 
   // Save to localStorage whenever fields change
   useEffect(() => {
@@ -79,6 +151,7 @@ export default function NewPostPage() {
     }
 
     try {
+      // First create the post
       const { data, error } = await supabase
         .from("posts")
         .insert([
@@ -93,6 +166,7 @@ export default function NewPostPage() {
             content: content.trim(),
             author_id: session.user.id,
             author_email: session.user.email,
+            attachments: [], // Will be updated after file upload
           },
         ])
         .select()
@@ -105,12 +179,42 @@ export default function NewPostPage() {
         return
       }
 
+      // Upload files if any
+      if (files.length > 0 && data) {
+        setUploadingFiles(true)
+        try {
+          const uploadedUrls = await uploadFiles(data.id)
+
+          // Update post with attachment URLs
+          const { error: updateError } = await supabase
+            .from("posts")
+            .update({ attachments: uploadedUrls })
+            .eq("id", data.id)
+
+          if (updateError) {
+            console.error("Error updating post with attachments:", updateError)
+            setError("Post created but failed to upload files")
+            setSubmitting(false)
+            setUploadingFiles(false)
+            return
+          }
+        } catch (uploadError) {
+          console.error("Error uploading files:", uploadError)
+          setError("Post created but failed to upload files")
+          setSubmitting(false)
+          setUploadingFiles(false)
+          return
+        }
+        setUploadingFiles(false)
+      }
+
       clearDraft()
       router.push("/posts")
     } catch (err) {
       console.error("Error creating post:", err)
       setError("Failed to create post")
       setSubmitting(false)
+      setUploadingFiles(false)
     }
   }
 
@@ -230,15 +334,71 @@ export default function NewPostPage() {
           />
         </div>
 
+        <div>
+          <label htmlFor="files" className="mb-2 block text-sm font-semibold">
+            Attachments (Images or Files)
+          </label>
+          <input
+            id="files"
+            type="file"
+            multiple
+            accept="image/*,.pdf,.doc,.docx,.txt"
+            onChange={handleFileChange}
+            className="w-full rounded border p-3"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Maximum 10MB per file. Images will be displayed, other files will be downloadable.
+          </p>
+
+          {/* File previews */}
+          {files.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {files.map((file, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded border p-2"
+                >
+                  <div className="flex items-center gap-2">
+                    {file.type.startsWith("image/") && filePreviews[index] && (
+                      <img
+                        src={filePreviews[index]}
+                        alt={file.name}
+                        className="h-12 w-12 rounded object-cover"
+                      />
+                    )}
+                    <div>
+                      <p className="text-sm font-medium">{file.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {(file.size / 1024).toFixed(1)} KB
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(index)}
+                    className="rounded px-2 py-1 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         <div className="flex gap-4">
           <button
             type="submit"
             className="rounded bg-black px-6 py-2 text-white hover:bg-gray-800 disabled:opacity-50"
-            disabled={submitting}
+            disabled={submitting || uploadingFiles}
           >
-            {submitting ? "Posting..." : "Create Post"}
+            {uploadingFiles
+              ? "Uploading files..."
+              : submitting
+                ? "Posting..."
+                : "Create Post"}
           </button>
           <button
             type="button"

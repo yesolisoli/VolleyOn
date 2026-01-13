@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { supabase } from "../../lib/supabaseClient"
+import PostCard from "../../components/PostCard"
 
 type Post = {
   id: string
@@ -13,6 +13,7 @@ type Post = {
   event_date: string | null
   event_time: string | null
   tag: string | null
+  attachments: string[] | null
   author_id: string
   author_email: string
   created_at: string
@@ -21,6 +22,7 @@ type Post = {
 
 type PostWithNickname = Post & {
   author_nickname: string | null
+  author_profile_photo_url: string | null
 }
 
 export default function SubsPage() {
@@ -52,19 +54,20 @@ export default function SubsPage() {
         // Fetch profiles for all authors
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
-          .select("id, nickname")
+          .select("id, nickname, profile_photo_url")
           .in("id", authorIds)
 
         if (profilesError) {
           console.error("Error fetching profiles:", profilesError)
         }
 
-        // Map posts with nicknames
+        // Map posts with nicknames and profile photos
         const postsWithNicknames: PostWithNickname[] = data.map((post) => {
           const profile = profiles?.find((p) => p.id === post.author_id)
           return {
             ...post,
             author_nickname: profile?.nickname || null,
+            author_profile_photo_url: profile?.profile_photo_url || null,
           }
         })
 
@@ -77,10 +80,6 @@ export default function SubsPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const getAuthorName = (post: PostWithNickname): string => {
-    return post.author_nickname || post.author_email
   }
 
   const formatTime = (time: string | null): string => {
@@ -117,41 +116,7 @@ export default function SubsPage() {
       {!loading && posts.length > 0 && (
         <div className="space-y-4">
           {posts.map((post) => (
-            <Link
-              key={post.id}
-              href={`/posts/${post.id}`}
-              className="block rounded-lg border bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="mb-2 text-lg font-semibold text-gray-900">{post.title}</h3>
-                  <div className="space-y-1 text-sm text-gray-600">
-                    {post.location && (
-                      <p>
-                        <span className="font-medium">Location:</span> {post.location}
-                      </p>
-                    )}
-                    {post.event_date && (
-                      <p>
-                        <span className="font-medium">Date:</span>{" "}
-                        {new Date(post.event_date).toLocaleDateString()}
-                      </p>
-                    )}
-                    {post.event_time && (
-                      <p>
-                        <span className="font-medium">Time:</span> {formatTime(post.event_time)}
-                      </p>
-                    )}
-                    <p>
-                      <span className="font-medium">Author:</span> {getAuthorName(post)}
-                    </p>
-                  </div>
-                </div>
-                <div className="ml-4 text-right text-sm text-gray-500">
-                  <p>{post.views} views</p>
-                </div>
-              </div>
-            </Link>
+            <PostCard key={post.id} post={post} formatTime={formatTime} />
           ))}
         </div>
       )}
