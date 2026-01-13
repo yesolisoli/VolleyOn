@@ -354,6 +354,7 @@ export default function EditPostPage() {
             <option value="Clinic">#Clinic</option>
             <option value="Chat">#Chat</option>
             <option value="Tips/Lecture">#Tips/Lecture</option>
+            <option value="Looking for Sub">#Looking for Sub</option>
           </select>
         </div>
 

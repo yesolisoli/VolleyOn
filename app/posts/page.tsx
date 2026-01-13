@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "../../lib/supabaseClient"
 
@@ -30,14 +31,24 @@ const TAGS = [
   "Clinic",
   "Chat",
   "Tips/Lecture",
+  "Looking for Sub",
 ]
 
 export default function PostsPage() {
+  const searchParams = useSearchParams()
   const [posts, setPosts] = useState<PostWithNickname[]>([])
   const [filteredPosts, setFilteredPosts] = useState<PostWithNickname[]>([])
   const [selectedTag, setSelectedTag] = useState<string>("All")
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Check if there's a tag in URL params
+    const tagFromUrl = searchParams.get("tag")
+    if (tagFromUrl && TAGS.includes(tagFromUrl)) {
+      setSelectedTag(tagFromUrl)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     fetchPosts()

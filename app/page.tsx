@@ -6,11 +6,26 @@ import Link from "next/link"
 export default function Home() {
   const cards = [
     { title: "Today's Games", href: "/games", description: "Games happening today" },
-    { title: "Posts", href: "/posts", description: "View all posts" },
-    { title: "New Post", href: "/posts/new", description: "Create a new post" },
-    { title: "Chats", href: "/chats", description: "Message other users" },
-    { title: "Profile", href: "/profile", description: "View your profile" },
-    { title: "Map", href: "/map", description: "View map" },
+    { title: "Looking for Sub", href: "/subs", description: "Posts looking for substitutes" },
+      { title: "Chat", href: "/chats", description: "Chat with other players" },
+    {
+      title: "#Grass",
+      href: "/posts?tag=Grass",
+      description: "View Grass posts",
+      backgroundImage: "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=800&h=600&fit=crop&q=80",
+    },
+    {
+      title: "#Beach",
+      href: "/posts?tag=Beach",
+      description: "View Beach posts",
+      backgroundImage: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=600&fit=crop&q=80",
+    },
+    {
+      title: "#Indoor",
+      href: "/posts?tag=Indoor",
+      description: "View Indoor posts",
+      backgroundImage: "https://images.unsplash.com/photo-1622163642992-9db4b66be117?w=800&h=600&fit=crop&q=80",
+    },
   ]
 
   return (
@@ -26,12 +41,44 @@ export default function Home() {
           <Link
             key={card.href}
             href={card.href}
-            className="group rounded-lg border bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+            className={`group relative overflow-hidden rounded-lg border shadow-sm transition-shadow hover:shadow-md ${
+              card.backgroundImage
+                ? "h-48 bg-cover bg-center bg-no-repeat"
+                : "bg-white p-6"
+            }`}
+            style={
+              card.backgroundImage
+                ? {
+                    backgroundImage: `url(${card.backgroundImage})`,
+                  }
+                : undefined
+            }
           >
-            <h3 className="mb-2 text-lg font-semibold text-gray-900 group-hover:text-blue-600">
-              {card.title}
-            </h3>
-            <p className="text-sm text-gray-600">{card.description}</p>
+            {card.backgroundImage && (
+              <div className="absolute inset-0 bg-black/40 transition-colors group-hover:bg-black/50" />
+            )}
+            <div
+              className={`relative h-full ${
+                card.backgroundImage ? "flex flex-col justify-end p-6" : ""
+              }`}
+            >
+              <h3
+                className={`mb-2 text-lg font-semibold ${
+                  card.backgroundImage
+                    ? "text-white drop-shadow-lg"
+                    : "text-gray-900 group-hover:text-blue-600"
+                }`}
+              >
+                {card.title}
+              </h3>
+              <p
+                className={`text-sm ${
+                  card.backgroundImage ? "text-white drop-shadow-md" : "text-gray-600"
+                }`}
+              >
+                {card.description}
+              </p>
+            </div>
           </Link>
         ))}
       </div>

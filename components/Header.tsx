@@ -9,33 +9,38 @@ export default function Header() {
   const { session, loading, signOut } = useAuth()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [nickname, setNickname] = useState<string | null>(null)
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Fetch nickname from profiles table
+  // Fetch nickname and profile photo from profiles table
   useEffect(() => {
     if (session?.user?.id) {
-      const fetchNickname = async () => {
+      const fetchProfile = async () => {
         try {
           const { data, error } = await supabase
             .from("profiles")
-            .select("nickname")
+            .select("nickname, profile_photo_url")
             .eq("id", session.user.id)
             .single()
 
           if (!error && data) {
             setNickname(data.nickname)
+            setProfilePhotoUrl(data.profile_photo_url)
           } else {
             // Fallback to user_metadata if profile doesn't exist
             setNickname(session.user.user_metadata?.nickname || null)
+            setProfilePhotoUrl(null)
           }
         } catch (err) {
           // Fallback to user_metadata on error
           setNickname(session.user.user_metadata?.nickname || null)
+          setProfilePhotoUrl(null)
         }
       }
-      fetchNickname()
+      fetchProfile()
     } else {
       setNickname(null)
+      setProfilePhotoUrl(null)
     }
   }, [session])
 
@@ -72,9 +77,6 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <Link href="/posts">Posts</Link>
-          {session && <Link href="/chats">Chats</Link>}
-
           {!loading && !session && (
             <>
               <Link href="/login" className="rounded border px-3 py-1">
@@ -90,26 +92,35 @@ export default function Header() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 rounded-full border border-gray-300 p-2 hover:bg-gray-50"
+                className="flex items-center gap-2 rounded-full border border-gray-300 p-1 hover:bg-gray-50"
                 aria-label="Account menu"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-gray-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                {profilePhotoUrl ? (
+                  <img
+                    src={profilePhotoUrl}
+                    alt="Profile"
+                    className="h-8 w-8 rounded-full object-cover"
+                    onError={(e) => {
+                      // Hide image and show icon if image fails to load
+                      e.currentTarget.style.display = "none"
+                    }}
                   />
-                </svg>
-                <span className="hidden text-sm font-medium sm:inline">
-                  {displayName}
-                </span>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-gray-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                )}
               </button>
 
               {dropdownOpen && (
