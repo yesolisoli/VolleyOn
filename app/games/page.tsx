@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { supabase } from "../../lib/supabaseClient"
 import PostCard from "../../components/PostCard"
 
@@ -125,6 +126,14 @@ export default function GamesPage() {
               linkHref={`/posts/${post.id}?from=games`}
             />
           ))}
+          <div className="flex justify-end">
+            <Link
+              href="/posts"
+              className="text-sm text-gray-500 hover:text-gray-700 hover:underline"
+            >
+              View all posts
+            </Link>
+          </div>
         </div>
       )}
     </div>

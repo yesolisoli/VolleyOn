@@ -210,9 +210,21 @@ export default function ProfilePage() {
       <div className="mb-6">
         <Link
           href="/"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-blue-200 text-blue-600 hover:border-blue-300 hover:text-blue-700"
+          aria-label="Back"
         >
-          ← Back to Home
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
         </Link>
       </div>
 

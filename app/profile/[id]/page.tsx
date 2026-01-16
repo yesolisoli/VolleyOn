@@ -69,9 +69,21 @@ export default function PublicProfilePage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="mt-4 inline-block text-blue-600 hover:underline"
+            className="mt-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-blue-200 text-blue-600 hover:border-blue-300 hover:text-blue-700"
+            aria-label="Back"
           >
-            ← Back
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
           </button>
         </div>
       </div>
@@ -94,9 +106,21 @@ export default function PublicProfilePage() {
         <button
           type="button"
           onClick={() => router.back()}
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-blue-200 text-blue-600 hover:border-blue-300 hover:text-blue-700"
+          aria-label="Back"
         >
-          ← Back
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
         </button>
       </div>
 
@@ -129,9 +153,6 @@ export default function PublicProfilePage() {
           )}
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{displayName}</h1>
-            {profile.bio && (
-              <p className="mt-2 whitespace-pre-wrap text-sm text-gray-600">{profile.bio}</p>
-            )}
           </div>
         </div>
 
@@ -148,6 +169,13 @@ export default function PublicProfilePage() {
               {profile.volleyball_experience || "Not shared"}
             </p>
           </div>
+        </div>
+
+        <div className="mt-4 rounded-lg border bg-gray-50 p-4">
+          <p className="text-xs font-semibold uppercase text-gray-500">Bio</p>
+          <p className="mt-1 whitespace-pre-wrap text-sm text-gray-900">
+            {profile.bio || "Not shared"}
+          </p>
         </div>
       </div>
     </div>

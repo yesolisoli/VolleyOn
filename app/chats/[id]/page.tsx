@@ -238,9 +238,21 @@ export default function ChatPage() {
           <p className="text-lg text-red-600">{error}</p>
           <Link
             href="/chats"
-            className="mt-4 inline-block text-blue-600 hover:underline"
+            className="mt-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-blue-200 text-blue-600 hover:border-blue-300 hover:text-blue-700"
+            aria-label="Back"
           >
-            ← Back to Chats
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
           </Link>
         </div>
       </div>
@@ -262,9 +274,21 @@ export default function ChatPage() {
       <div className="mb-4 flex items-center border-b pb-4">
         <Link
           href="/chats"
-          className="mr-4 text-blue-600 hover:text-blue-800 hover:underline"
+          className="mr-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-blue-200 text-blue-600 hover:border-blue-300 hover:text-blue-700"
+          aria-label="Back"
         >
-          ← Back
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
         </Link>
         <h1 className="text-xl font-bold">{displayName}</h1>
       </div>

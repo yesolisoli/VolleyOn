@@ -134,9 +134,10 @@ export default function ApplicantsPage() {
             const profile = application.profile
             const displayName = profile?.nickname || "User"
             return (
-              <div
+              <Link
                 key={application.user_id}
-                className="rounded-lg border bg-white p-4 shadow-sm"
+                href={`/profile/${application.user_id}`}
+                className="rounded-lg border bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="flex items-center gap-4">
                   {profile?.profile_photo_url ? (
@@ -185,12 +186,7 @@ export default function ApplicantsPage() {
                     </p>
                   </div>
                 </div>
-                {profile?.bio && (
-                  <p className="mt-3 whitespace-pre-wrap text-sm text-gray-600">
-                    {profile.bio}
-                  </p>
-                )}
-              </div>
+              </Link>
             )
           })}
         </div>
