@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "../../../lib/supabaseClient"
+import { useAuth } from "../../../components/AuthProvider"
 
 type PublicProfile = {
   id: string
@@ -17,10 +18,12 @@ type PublicProfile = {
 export default function PublicProfilePage() {
   const params = useParams()
   const router = useRouter()
+  const { session } = useAuth()
   const profileId = params.id as string
   const [profile, setProfile] = useState<PublicProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [chatLoading, setChatLoading] = useState(false)
 
   useEffect(() => {
     if (!profileId) return
@@ -99,6 +102,53 @@ export default function PublicProfilePage() {
   }
 
   const displayName = profile.nickname || "User"
+  const canChat = session?.user?.id && session.user.id !== profile.id
+
+  const handleStartChat = async () => {
+    if (!session?.user?.id) return
+    setChatLoading(true)
+
+    try {
+      const user1Id = session.user.id < profile.id ? session.user.id : profile.id
+      const user2Id = session.user.id < profile.id ? profile.id : session.user.id
+
+      const { data: existingChat } = await supabase
+        .from("chats")
+        .select("id")
+        .eq("user1_id", user1Id)
+        .eq("user2_id", user2Id)
+        .single()
+
+      if (existingChat) {
+        router.push(`/chats/${existingChat.id}`)
+        return
+      }
+
+      const { data: newChat, error: createError } = await supabase
+        .from("chats")
+        .insert([
+          {
+            user1_id: user1Id,
+            user2_id: user2Id,
+          },
+        ])
+        .select()
+        .single()
+
+      if (createError) {
+        console.error("Error creating chat:", createError)
+        alert("Failed to create chat")
+        return
+      }
+
+      router.push(`/chats/${newChat.id}`)
+    } catch (err) {
+      console.error("Error creating chat:", err)
+      alert("Failed to create chat")
+    } finally {
+      setChatLoading(false)
+    }
+  }
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -125,7 +175,7 @@ export default function PublicProfilePage() {
       </div>
 
       <div className="rounded-lg border bg-white p-8 shadow-sm">
-        <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+        <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-start sm:text-left">
           {profile.profile_photo_url ? (
             <img
               src={profile.profile_photo_url}
@@ -151,8 +201,20 @@ export default function PublicProfilePage() {
               />
             </svg>
           )}
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{displayName}</h1>
+          <div className="flex w-full flex-col items-center gap-3 sm:items-start">
+            <div className="flex w-full flex-col items-center justify-between gap-3 sm:flex-row">
+              <h1 className="text-2xl font-bold text-gray-900">{displayName}</h1>
+              {canChat && (
+                <button
+                  type="button"
+                  onClick={handleStartChat}
+                  className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                  disabled={chatLoading}
+                >
+                  {chatLoading ? "Starting..." : "Start chat"}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

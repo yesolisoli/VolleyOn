@@ -74,9 +74,9 @@ export default function Header() {
   return (
     <header className="relative z-[1000] border-b bg-white">
       <nav className="mx-auto flex max-w-6xl items-center justify-between py-4">
-        <Link href="/" className="flex items-center gap-1 text-xl font-bold">
-          <span>VolleyOn</span>
+        <Link href="/" className="flex items-center gap-2 text-xl font-bold">
           <span className="text-2xl">🏐</span>
+          <span>VolleyOn</span>
         </Link>
 
         <div className="flex items-center gap-4">

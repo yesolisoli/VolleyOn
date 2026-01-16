@@ -5,9 +5,24 @@ import Link from "next/link"
 
 export default function Home() {
   const cards = [
-    { title: "Today's Games", href: "/games", description: "Games happening today" },
-    { title: "Looking for Sub", href: "/subs", description: "Posts looking for substitutes" },
-      { title: "Chat", href: "/chats", description: "Chat with other players" },
+    {
+      title: "Today's Games",
+      href: "/games",
+      description: "Games happening today",
+      icon: "🏐",
+    },
+    {
+      title: "Looking for Sub",
+      href: "/subs",
+      description: "Posts looking for substitutes",
+      icon: "🧑‍🤝‍🧑",
+    },
+    {
+      title: "Chat",
+      href: "/chats",
+      description: "Chat with other players",
+      icon: "💬",
+    },
     {
       title: "#Grass",
       href: "/posts?tag=Grass",
@@ -33,7 +48,9 @@ export default function Home() {
 
       <div className="mb-8">
         <h2 className="mb-4 text-xl font-semibold">All Event Locations</h2>
-        <PostsMap />
+        <div className="overflow-hidden rounded-lg shadow-sm">
+          <PostsMap />
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -41,9 +58,9 @@ export default function Home() {
           <Link
             key={card.href}
             href={card.href}
-            className={`group relative overflow-hidden rounded-lg border shadow-sm transition-shadow hover:shadow-md ${
+            className={`group relative h-40 min-h-40 overflow-hidden rounded-lg border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
               card.backgroundImage
-                ? "h-48 bg-cover bg-center bg-no-repeat"
+                ? "bg-cover bg-center bg-no-repeat"
                 : "bg-white p-6"
             }`}
             style={
@@ -59,25 +76,29 @@ export default function Home() {
             )}
             <div
               className={`relative h-full ${
-                card.backgroundImage ? "flex flex-col justify-end p-6" : ""
+                card.backgroundImage ? "flex flex-col justify-end p-6" : "flex flex-col justify-center gap-3"
               }`}
             >
-              <h3
-                className={`mb-2 text-lg font-semibold ${
-                  card.backgroundImage
-                    ? "text-white drop-shadow-lg"
-                    : "text-gray-900 group-hover:text-blue-600"
-                }`}
-              >
-                {card.title}
-              </h3>
-              <p
-                className={`text-sm ${
-                  card.backgroundImage ? "text-white drop-shadow-md" : "text-gray-600"
-                }`}
-              >
-                {card.description}
-              </p>
+              {card.backgroundImage ? (
+                <>
+                  <h3 className="mb-2 text-lg font-semibold text-white drop-shadow-lg">
+                    {card.title}
+                  </h3>
+                  <p className="text-sm text-white drop-shadow-md">{card.description}</p>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-lg">
+                      <span aria-hidden="true">{card.icon}</span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {card.title}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-gray-600">{card.description}</p>
+                </>
+              )}
             </div>
           </Link>
         ))}
