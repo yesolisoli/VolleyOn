@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import Link from "next/link"
 import { supabase } from "../../../lib/supabaseClient"
 import { useAuth } from "../../../components/AuthProvider"
 
@@ -47,7 +46,7 @@ export default function ChatPage() {
     }
 
     return () => {
-      // Cleanup will be handled by setupRealtimeSubscription
+      // Cleanup handled by subscription
     }
   }, [session, authLoading, chatId, router])
 
@@ -59,12 +58,8 @@ export default function ChatPage() {
   }, [session, chatId])
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+  }, [messages])
 
   const fetchChat = async () => {
     if (!session?.user?.id || !chatId) return
@@ -79,24 +74,14 @@ export default function ChatPage() {
         .eq("id", chatId)
         .single()
 
-      if (chatError) {
+      if (chatError || !chatData) {
         console.error("Error fetching chat:", chatError)
         setError("Chat not found")
         setLoading(false)
         return
       }
 
-      if (!chatData) {
-        setError("Chat not found")
-        setLoading(false)
-        return
-      }
-
-      // Check if user is part of this chat
-      if (
-        chatData.user1_id !== session.user.id &&
-        chatData.user2_id !== session.user.id
-      ) {
+      if (chatData.user1_id !== session.user.id && chatData.user2_id !== session.user.id) {
         setError("You don't have permission to view this chat")
         setLoading(false)
         return
@@ -104,7 +89,6 @@ export default function ChatPage() {
 
       setChat(chatData)
 
-      // Fetch other user's profile
       const otherUserId =
         chatData.user1_id === session.user.id
           ? chatData.user2_id
@@ -122,7 +106,6 @@ export default function ChatPage() {
         email: profileData?.email || "",
       })
 
-      // Fetch messages
       await fetchMessages()
     } catch (err) {
       console.error("Error fetching chat:", err)
@@ -228,7 +211,7 @@ export default function ChatPage() {
   }
 
   if (!session) {
-    return null // Redirect handled by useEffect
+    return null
   }
 
   if (error && !chat) {
@@ -236,8 +219,9 @@ export default function ChatPage() {
       <div className="mx-auto max-w-3xl">
         <div className="rounded-lg border p-6 text-center">
           <p className="text-lg text-red-600">{error}</p>
-          <Link
-            href="/chats"
+          <button
+            type="button"
+            onClick={() => router.back()}
             className="mt-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-blue-200 text-blue-600 hover:border-blue-300 hover:text-blue-700"
             aria-label="Back"
           >
@@ -253,7 +237,7 @@ export default function ChatPage() {
             >
               <path d="M15 18l-6-6 6-6" />
             </svg>
-          </Link>
+          </button>
         </div>
       </div>
     )
@@ -272,8 +256,9 @@ export default function ChatPage() {
   return (
     <div className="mx-auto flex h-[calc(100vh-120px)] max-w-3xl flex-col">
       <div className="mb-4 flex items-center border-b pb-4">
-        <Link
-          href="/chats"
+        <button
+          type="button"
+          onClick={() => router.back()}
           className="mr-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-blue-200 text-blue-600 hover:border-blue-300 hover:text-blue-700"
           aria-label="Back"
         >
@@ -289,7 +274,7 @@ export default function ChatPage() {
           >
             <path d="M15 18l-6-6 6-6" />
           </svg>
-        </Link>
+        </button>
         <h1 className="text-xl font-bold">{displayName}</h1>
       </div>
 
@@ -314,12 +299,8 @@ export default function ChatPage() {
                       : "bg-gray-200 text-gray-900"
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
-                  <p
-                    className={`mt-1 text-xs ${
-                      isOwnMessage ? "text-blue-100" : "text-gray-500"
-                    }`}
-                  >
+                  <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                  <p className="mt-1 text-right text-xs opacity-70">
                     {formatMessageTime(message.created_at)}
                   </p>
                 </div>
@@ -330,25 +311,20 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {error && (
-        <div className="mt-2 text-sm text-red-600">{error}</div>
-      )}
-
       <form onSubmit={handleSendMessage} className="mt-4 flex gap-2">
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
+          className="flex-1 rounded-md border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Type a message..."
-          className="flex-1 rounded-lg border p-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          disabled={sending}
         />
         <button
           type="submit"
-          disabled={sending || !newMessage.trim()}
-          className="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          disabled={sending}
         >
-          {sending ? "Sending..." : "Send"}
+          Send
         </button>
       </form>
     </div>
