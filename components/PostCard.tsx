@@ -27,6 +27,7 @@ type PostWithAuthor = Post & {
 type PostCardProps = {
   post: PostWithAuthor
   formatTime?: (time: string | null) => string
+  linkHref?: string
 }
 
 const getFirstImage = (attachments: string[] | null): string | null => {
@@ -51,12 +52,17 @@ const defaultFormatTime = (time: string | null): string => {
   }
 }
 
-export default function PostCard({ post, formatTime = defaultFormatTime }: PostCardProps) {
+export default function PostCard({
+  post,
+  formatTime = defaultFormatTime,
+  linkHref,
+}: PostCardProps) {
   const firstImage = getFirstImage(post.attachments)
+  const postHref = linkHref || `/posts/${post.id}`
 
   return (
     <Link
-      href={`/posts/${post.id}`}
+      href={postHref}
       className="block rounded-lg border bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="flex items-center gap-4">

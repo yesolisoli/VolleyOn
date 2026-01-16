@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "../../../lib/supabaseClient"
 
@@ -16,6 +16,7 @@ type PublicProfile = {
 
 export default function PublicProfilePage() {
   const params = useParams()
+  const router = useRouter()
   const profileId = params.id as string
   const [profile, setProfile] = useState<PublicProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -65,9 +66,13 @@ export default function PublicProfilePage() {
       <div className="mx-auto max-w-3xl">
         <div className="rounded-lg border p-6 text-center">
           <p className="text-lg text-red-600">{error}</p>
-          <Link href="/posts" className="mt-4 inline-block text-blue-600 hover:underline">
-            ← Back to Posts
-          </Link>
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="mt-4 inline-block text-blue-600 hover:underline"
+          >
+            ← Back
+          </button>
         </div>
       </div>
     )
@@ -86,12 +91,13 @@ export default function PublicProfilePage() {
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-6">
-        <Link
-          href="/posts"
+        <button
+          type="button"
+          onClick={() => router.back()}
           className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
         >
-          ← Back to Posts
-        </Link>
+          ← Back
+        </button>
       </div>
 
       <div className="rounded-lg border bg-white p-8 shadow-sm">

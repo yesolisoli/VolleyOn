@@ -262,12 +262,13 @@ export default function PostDetailPage() {
       <div className="mx-auto max-w-3xl">
         <div className="rounded-lg border p-6 text-center">
           <p className="text-lg text-red-600">{error}</p>
-          <Link
-            href="/posts"
+          <button
+            type="button"
+            onClick={() => router.back()}
             className="mt-4 inline-block text-blue-600 hover:underline"
           >
-            ← Back to Posts
-          </Link>
+            ← Back
+          </button>
         </div>
       </div>
     )
@@ -287,12 +288,13 @@ export default function PostDetailPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-6">
-        <Link
-          href="/posts"
+        <button
+          type="button"
+          onClick={() => router.back()}
           className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
         >
-          ← Back to Posts
-        </Link>
+          ← Back
+        </button>
       </div>
 
       <article className="rounded-lg border bg-white p-8 shadow-sm">
@@ -382,52 +384,6 @@ export default function PostDetailPage() {
             <p className="text-sm text-gray-500">Loading applications...</p>
           ) : applications.length === 0 ? (
             <p className="text-sm text-gray-500">No applications yet.</p>
-          ) : isAuthor ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {applications.map((application) => {
-                const profile = application.profile
-                const displayName = profile?.nickname || "User"
-                return (
-                  <Link
-                    key={application.user_id}
-                    href={`/profile/${application.user_id}`}
-                    className="flex items-center gap-3 rounded-lg border bg-white p-3 hover:bg-gray-50"
-                  >
-                    {profile?.profile_photo_url ? (
-                      <img
-                        src={profile.profile_photo_url}
-                        alt={displayName}
-                        className="h-10 w-10 rounded-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none"
-                        }}
-                      />
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-10 w-10 rounded-full border border-gray-200 bg-gray-100 p-2 text-gray-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
-                    )}
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{displayName}</p>
-                      <p className="text-xs text-gray-500">
-                        Applied {new Date(application.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
           ) : (
             <div>
               <p className="text-sm text-gray-600">Applications: {applications.length}</p>
@@ -467,6 +423,16 @@ export default function PostDetailPage() {
                   )
                 })}
               </div>
+              {isAuthor && (
+                <div className="mt-3">
+                  <Link
+                    href={`/posts/${post.id}/applicants`}
+                    className="text-sm font-medium text-blue-600 hover:underline"
+                  >
+                    Show applicants
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </div>

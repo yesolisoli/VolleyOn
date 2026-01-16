@@ -1,11 +1,13 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "./AuthProvider"
 import { supabase } from "../lib/supabaseClient"
 
 export default function Header() {
+  const router = useRouter()
   const { session, loading, signOut } = useAuth()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [nickname, setNickname] = useState<string | null>(null)
@@ -64,6 +66,7 @@ export default function Header() {
   const handleSignOut = async () => {
     await signOut()
     setDropdownOpen(false)
+    router.push("/login")
   }
 
   const displayName = nickname || session?.user?.email || "User"

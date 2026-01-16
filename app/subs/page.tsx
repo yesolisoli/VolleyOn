@@ -116,7 +116,12 @@ export default function SubsPage() {
       {!loading && posts.length > 0 && (
         <div className="space-y-4">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} formatTime={formatTime} />
+            <PostCard
+              key={post.id}
+              post={post}
+              formatTime={formatTime}
+              linkHref={`/posts/${post.id}?from=subs`}
+            />
           ))}
         </div>
       )}
