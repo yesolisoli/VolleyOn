@@ -28,6 +28,21 @@ type PostWithNickname = Post & {
   author_nickname: string | null
 }
 
+type ApplicationProfile = {
+  id: string
+  nickname: string | null
+  profile_photo_url: string | null
+  volleyball_level: string | null
+  volleyball_experience: string | null
+  bio: string | null
+}
+
+type PostApplication = {
+  user_id: string
+  created_at: string
+  profile: ApplicationProfile | null
+}
+
 export default function PostDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -35,13 +50,21 @@ export default function PostDetailPage() {
   const postId = params.id as string
 
   const [post, setPost] = useState<PostWithNickname | null>(null)
+  const [applications, setApplications] = useState<PostApplication[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [applicationsLoading, setApplicationsLoading] = useState(false)
+  const [applyLoading, setApplyLoading] = useState(false)
 
   useEffect(() => {
     if (postId) {
       fetchPost()
     }
+  }, [postId])
+
+  useEffect(() => {
+    if (!postId) return
+    fetchApplications()
   }, [postId])
 
   const fetchPost = async () => {
@@ -92,6 +115,108 @@ export default function PostDetailPage() {
       setError("Failed to load post")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchApplications = async () => {
+    try {
+      setApplicationsLoading(true)
+      const { data, error: applicationsError } = await supabase
+        .from("post_applications")
+        .select("user_id, created_at")
+        .eq("post_id", postId)
+        .order("created_at", { ascending: true })
+
+      if (applicationsError) {
+        console.error("Error fetching applications:", applicationsError)
+        setApplications([])
+        return
+      }
+
+      if (!data || data.length === 0) {
+        setApplications([])
+        return
+      }
+
+      const userIds = [...new Set(data.map((item) => item.user_id))]
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, nickname, profile_photo_url, volleyball_level, volleyball_experience, bio")
+        .in("id", userIds)
+
+      if (profilesError) {
+        console.error("Error fetching applicant profiles:", profilesError)
+      }
+
+      const applicationsWithProfiles: PostApplication[] = data.map((item) => {
+        const profile = profiles?.find((p) => p.id === item.user_id) || null
+        return {
+          user_id: item.user_id,
+          created_at: item.created_at,
+          profile,
+        }
+      })
+
+      setApplications(applicationsWithProfiles)
+    } catch (err) {
+      console.error("Error fetching applications:", err)
+      setApplications([])
+    } finally {
+      setApplicationsLoading(false)
+    }
+  }
+
+  const handleApply = async () => {
+    if (!session?.user?.id) {
+      router.push("/login")
+      return
+    }
+
+    try {
+      setApplyLoading(true)
+      const { error: applyError } = await supabase.from("post_applications").insert({
+        post_id: postId,
+        user_id: session.user.id,
+      })
+
+      if (applyError) {
+        console.error("Error applying to post:", applyError)
+        alert("Failed to apply to post")
+        return
+      }
+
+      await fetchApplications()
+    } catch (err) {
+      console.error("Error applying to post:", err)
+      alert("Failed to apply to post")
+    } finally {
+      setApplyLoading(false)
+    }
+  }
+
+  const handleWithdraw = async () => {
+    if (!session?.user?.id) return
+
+    try {
+      setApplyLoading(true)
+      const { error: withdrawError } = await supabase
+        .from("post_applications")
+        .delete()
+        .eq("post_id", postId)
+        .eq("user_id", session.user.id)
+
+      if (withdrawError) {
+        console.error("Error withdrawing application:", withdrawError)
+        alert("Failed to withdraw application")
+        return
+      }
+
+      await fetchApplications()
+    } catch (err) {
+      console.error("Error withdrawing application:", err)
+      alert("Failed to withdraw application")
+    } finally {
+      setApplyLoading(false)
     }
   }
 
@@ -157,6 +282,7 @@ export default function PostDetailPage() {
   }
 
   const isAuthor = session?.user?.id === post.author_id
+  const hasApplied = !!session?.user?.id && applications.some((item) => item.user_id === session.user.id)
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -221,6 +347,128 @@ export default function PostDetailPage() {
 
         <div className="mb-8 whitespace-pre-wrap text-gray-900 leading-7">
           {post.content}
+        </div>
+
+        <div className="mb-8 border-t pt-6">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold">Applications</h2>
+            {!session && (
+              <Link
+                href="/login"
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Login to apply
+              </Link>
+            )}
+            {session && !isAuthor && (
+              <button
+                onClick={hasApplied ? handleWithdraw : handleApply}
+                className={`rounded-md px-4 py-2 text-sm font-medium ${
+                  hasApplied
+                    ? "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                    : "bg-black text-white hover:bg-gray-800"
+                }`}
+                disabled={applyLoading}
+              >
+                {hasApplied ? "Withdraw application" : "Apply to join"}
+              </button>
+            )}
+            {session && isAuthor && (
+              <span className="text-sm text-gray-500">You are the author</span>
+            )}
+          </div>
+
+          {applicationsLoading ? (
+            <p className="text-sm text-gray-500">Loading applications...</p>
+          ) : applications.length === 0 ? (
+            <p className="text-sm text-gray-500">No applications yet.</p>
+          ) : isAuthor ? (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {applications.map((application) => {
+                const profile = application.profile
+                const displayName = profile?.nickname || "User"
+                return (
+                  <Link
+                    key={application.user_id}
+                    href={`/profile/${application.user_id}`}
+                    className="flex items-center gap-3 rounded-lg border bg-white p-3 hover:bg-gray-50"
+                  >
+                    {profile?.profile_photo_url ? (
+                      <img
+                        src={profile.profile_photo_url}
+                        alt={displayName}
+                        className="h-10 w-10 rounded-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none"
+                        }}
+                      />
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-10 w-10 rounded-full border border-gray-200 bg-gray-100 p-2 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    )}
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{displayName}</p>
+                      <p className="text-xs text-gray-500">
+                        Applied {new Date(application.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          ) : (
+            <div>
+              <p className="text-sm text-gray-600">Applications: {applications.length}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {applications.map((application) => {
+                  const profile = application.profile
+                  return profile?.profile_photo_url ? (
+                    <img
+                      key={application.user_id}
+                      src={profile.profile_photo_url}
+                      alt="Applicant avatar"
+                      className="h-8 w-8 rounded-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none"
+                      }}
+                    />
+                  ) : (
+                    <div
+                      key={application.user_id}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-gray-400"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Display attachments */}

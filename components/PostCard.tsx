@@ -92,18 +92,63 @@ export default function PostCard({ post, formatTime = defaultFormatTime }: PostC
           </div>
           <div className="space-y-1 text-sm text-gray-600">
             {post.location && (
-              <p>
-                <span className="font-medium">Location:</span> {getShortLocationName(post.location)}
+              <p className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 text-gray-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 21s-6-4.35-6-10a6 6 0 1112 0c0 5.65-6 10-6 10z" />
+                  <circle cx="12" cy="11" r="2" />
+                </svg>
+                <span>{getShortLocationName(post.location)}</span>
               </p>
             )}
-            {post.event_date && (
-              <p>
-                <span className="font-medium">Date:</span> {new Date(post.event_date).toLocaleDateString()}
-              </p>
-            )}
-            {post.event_time && (
-              <p>
-                <span className="font-medium">Time:</span> {formatTime(post.event_time)}
+            {(post.event_date || post.event_time) && (
+              <p className="flex items-center gap-2">
+                {post.event_date && (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-gray-400"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span>{new Date(post.event_date).toLocaleDateString()}</span>
+                  </>
+                )}
+                {post.event_time && (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-gray-400"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M12 7v5l3 3" />
+                    </svg>
+                    <span>{formatTime(post.event_time)}</span>
+                  </>
+                )}
               </p>
             )}
           </div>

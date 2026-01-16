@@ -24,7 +24,7 @@ export default function Home() {
       title: "#Indoor",
       href: "/posts?tag=Indoor",
       description: "View Indoor posts",
-      backgroundImage: "https://images.unsplash.com/photo-1622163642992-9db4b66be117?w=800&h=600&fit=crop&q=80",
+      backgroundImage: "https://images.unsplash.com/photo-1547347298-4074fc3086f0?w=800&h=600&fit=crop&q=80",
     },
   ]
 

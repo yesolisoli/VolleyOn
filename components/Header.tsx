@@ -124,26 +124,23 @@ export default function Header() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 z-[1001] mt-2 w-48 rounded-md border bg-white shadow-lg">
-                  <div className="py-1">
+                <div className="absolute right-0 z-[1001] mt-2 w-48 rounded-md border bg-white text-left shadow-lg">
+                  <div className="flex flex-col py-1">
                     <div className="border-b px-4 py-2">
                       <p className="text-sm font-semibold text-gray-900">
                         {nickname || "User"}
                       </p>
-                      <p className="truncate text-xs text-gray-500">
-                        {session.user.email}
-                      </p>
                     </div>
                     <Link
                       href="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="flex items-center justify-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       onClick={() => setDropdownOpen(false)}
                     >
                       Profile
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      className="flex w-full items-center justify-start px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                     >
                       Sign out
                     </button>
