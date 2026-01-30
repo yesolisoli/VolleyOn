@@ -93,14 +93,22 @@ export default function PostsMap() {
     // Fix Leaflet marker icon
     if (typeof window !== "undefined") {
       import("leaflet").then((L) => {
-        delete (L.Icon.Default.prototype as any)._getIconUrl
-        L.Icon.Default.mergeOptions({
-          iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-          iconRetinaUrl:
-            "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-          shadowUrl:
-            "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+        const whiteMarkerSvg =
+          "data:image/svg+xml;utf8," +
+          "<svg xmlns='http://www.w3.org/2000/svg' width='25' height='41' viewBox='0 0 25 41'>" +
+          "<path d='M12.5 0C6 0 0.7 5.3 0.7 11.8c0 7.9 10.3 18.2 11 18.9 0.4 0.4 1 0.4 1.4 0 0.7-0.7 11-11 11-18.9C24.3 5.3 19 0 12.5 0z' fill='%23ffffff' stroke='%239ca3af' stroke-width='1.5'/>" +
+          "<circle cx='12.5' cy='11.8' r='4.5' fill='%23e5e7eb' stroke='%239ca3af' stroke-width='1.2'/>" +
+          "</svg>"
+
+        const whiteIcon = L.icon({
+          iconUrl: whiteMarkerSvg,
+          iconRetinaUrl: whiteMarkerSvg,
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [0, -36],
         })
+
+        L.Marker.prototype.options.icon = whiteIcon
       })
     }
 
@@ -211,8 +219,8 @@ export default function PostsMap() {
         scrollWheelZoom={true}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://stadiamaps.com">Stadia Maps</a>'
+          url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
         />
         {markers.map((marker) => (
           <Marker key={marker.id} position={[marker.lat, marker.lng]}>

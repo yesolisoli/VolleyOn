@@ -419,7 +419,7 @@ export default function PostDetailPage() {
                       key={application.user_id}
                       src={profile.profile_photo_url}
                       alt="Applicant avatar"
-                      className="h-8 w-8 rounded-full object-cover"
+                      className="h-8 w-8 rounded-full object-cover grayscale"
                       onError={(e) => {
                         e.currentTarget.style.display = "none"
                       }}

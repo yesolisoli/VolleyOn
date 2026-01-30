@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
+import { useMap } from "react-leaflet"
 
 // Dynamically import leaflet components to avoid SSR issues
 const MapContainer = dynamic(
@@ -16,10 +17,10 @@ const Marker = dynamic(
   () => import("react-leaflet").then((mod) => mod.Marker),
   { ssr: false }
 )
-const useMap = dynamic(
-  () => import("react-leaflet").then((mod) => mod.useMap),
-  { ssr: false }
-)
+// const useMap = dynamic(
+//   () => import("react-leaflet").then((mod) => mod.useMap),
+//   { ssr: false }
+// )
 
 // Import CSS
 import "leaflet/dist/leaflet.css"
@@ -123,7 +124,8 @@ export default function LeafletMapInput({
   const [isSearching, setIsSearching] = useState(false)
   const [mounted, setMounted] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const searchTimeoutRef = useRef<NodeJS.Timeout>()
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
 
   // Only run on client side
   useEffect(() => {

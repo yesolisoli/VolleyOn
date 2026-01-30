@@ -246,7 +246,7 @@ export default function ProfilePage() {
                   <img
                     src={profile.profile_photo_url}
                     alt="Current profile"
-                    className="h-24 w-24 rounded-full object-cover"
+                    className="h-24 w-24 rounded-full object-cover grayscale"
                     onError={(e) => {
                       e.currentTarget.style.display = "none"
                     }}
@@ -260,7 +260,7 @@ export default function ProfilePage() {
                   <img
                     src={photoPreview}
                     alt="Profile preview"
-                    className="h-24 w-24 rounded-full object-cover"
+                    className="h-24 w-24 rounded-full object-cover grayscale"
                     onError={(e) => {
                       e.currentTarget.style.display = "none"
                     }}

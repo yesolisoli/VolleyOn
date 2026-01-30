@@ -144,7 +144,7 @@ export default function ApplicantsPage() {
                     <img
                       src={profile.profile_photo_url}
                       alt={displayName}
-                      className="h-14 w-14 rounded-full object-cover"
+                      className="h-14 w-14 rounded-full object-cover grayscale"
                       onError={(e) => {
                         e.currentTarget.style.display = "none"
                       }}

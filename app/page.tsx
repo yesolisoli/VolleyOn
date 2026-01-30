@@ -2,6 +2,12 @@
 
 import PostsMap from "../components/PostsMap"
 import Link from "next/link"
+import { Anton } from "next/font/google"
+
+const anton = Anton({
+  subsets: ["latin"],
+  weight: ["400"],
+})
 
 export default function Home() {
   const cards = [
@@ -9,19 +15,19 @@ export default function Home() {
       title: "Today's Games",
       href: "/games",
       description: "Games happening today",
-      icon: "🏐",
+      icon: "#",
     },
     {
       title: "Looking for Sub",
       href: "/subs",
       description: "Posts looking for substitutes",
-      icon: "🧑‍🤝‍🧑",
+      icon: "#",
     },
     {
       title: "Chat",
       href: "/chats",
       description: "Chat with other players",
-      icon: "💬",
+      icon: "#",
     },
     {
       title: "#Grass",
@@ -58,10 +64,8 @@ export default function Home() {
           <Link
             key={card.href}
             href={card.href}
-            className={`group relative h-40 min-h-40 overflow-hidden rounded-lg border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
-              card.backgroundImage
-                ? "bg-cover bg-center bg-no-repeat"
-                : "bg-white p-6"
+            className={`group relative h-40 min-h-40 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+              card.backgroundImage ? "bg-cover bg-center bg-no-repeat" : "p-6"
             }`}
             style={
               card.backgroundImage
@@ -81,18 +85,25 @@ export default function Home() {
             >
               {card.backgroundImage ? (
                 <>
-                  <h3 className="mb-2 text-lg font-semibold text-white drop-shadow-lg">
-                    {card.title}
-                  </h3>
+                  <div className="mb-2 flex items-center gap-3">
+                    <span className="text-6xl font-semibold text-white">#</span>
+                    <h3
+                      className={`text-4xl font-semibold text-white drop-shadow-lg ${anton.className}`}
+                    >
+                      {card.title.startsWith("#") ? card.title.slice(1) : card.title}
+                    </h3>
+                  </div>
                   <p className="text-sm text-white drop-shadow-md">{card.description}</p>
                 </>
               ) : (
                 <>
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-lg">
+                    <div className="flex h-10 w-10 items-center justify-center text-6xl font-semibold text-black">
                       <span aria-hidden="true">{card.icon}</span>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3
+                      className={`text-4xl font-semibold text-gray-900 group-hover:text-slate-700 ${anton.className}`}
+                    >
                       {card.title}
                     </h3>
                   </div>

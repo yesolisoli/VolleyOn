@@ -164,7 +164,7 @@ export default function PostCard({
             <img
               src={post.author_profile_photo_url}
               alt={getAuthorName(post)}
-              className="h-10 w-10 rounded-full object-cover"
+              className="h-10 w-10 rounded-full object-cover grayscale"
               onError={(e) => {
                 // Fallback to icon if image fails to load
                 e.currentTarget.style.display = "none"

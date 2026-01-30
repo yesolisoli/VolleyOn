@@ -180,7 +180,7 @@ export default function PublicProfilePage() {
             <img
               src={profile.profile_photo_url}
               alt={displayName}
-              className="h-24 w-24 rounded-full object-cover"
+              className="h-24 w-24 rounded-full object-cover grayscale"
               onError={(e) => {
                 e.currentTarget.style.display = "none"
               }}

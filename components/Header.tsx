@@ -13,6 +13,12 @@ type ChatRoom = {
   updated_at: string
 }
 
+type DirectChat = {
+  id: string
+  other_user_id: string
+  other_user_name: string
+}
+
 export default function Header() {
   const router = useRouter()
   const { session, loading, signOut } = useAuth()
@@ -21,6 +27,7 @@ export default function Header() {
   const [nickname, setNickname] = useState<string | null>(null)
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null)
   const [rooms, setRooms] = useState<ChatRoom[]>([])
+  const [directChats, setDirectChats] = useState<DirectChat[]>([])
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Fetch nickname and profile photo from profiles table
@@ -50,10 +57,12 @@ export default function Header() {
       }
       fetchProfile()
       fetchRooms()
+      fetchDirectChats()
     } else {
       setNickname(null)
       setProfilePhotoUrl(null)
       setRooms([])
+      setDirectChats([])
     }
   }, [session])
 
@@ -112,6 +121,55 @@ export default function Header() {
     }
   }
 
+  const fetchDirectChats = async () => {
+    if (!session?.user?.id) return
+
+    try {
+      const { data: chatsData, error: chatsError } = await supabase
+        .from("chats")
+        .select("id, user1_id, user2_id, updated_at")
+        .or(`user1_id.eq.${session.user.id},user2_id.eq.${session.user.id}`)
+        .order("updated_at", { ascending: false })
+
+      if (chatsError) {
+        console.error("Error fetching direct chats:", chatsError)
+        return
+      }
+
+      if (!chatsData || chatsData.length === 0) {
+        setDirectChats([])
+        return
+      }
+
+      const otherUserIds = chatsData.map((chat) =>
+        chat.user1_id === session.user.id ? chat.user2_id : chat.user1_id
+      )
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, nickname, email")
+        .in("id", otherUserIds)
+
+      if (profilesError) {
+        console.error("Error fetching direct chat profiles:", profilesError)
+      }
+
+      const chatsWithNames = chatsData.map((chat) => {
+        const otherId = chat.user1_id === session.user.id ? chat.user2_id : chat.user1_id
+        const profile = profiles?.find((p) => p.id === otherId)
+        return {
+          id: chat.id,
+          other_user_id: otherId,
+          other_user_name: profile?.nickname || profile?.email || "User",
+        }
+      })
+
+      setDirectChats(chatsWithNames)
+    } catch (error) {
+      console.error("Error fetching direct chats:", error)
+    }
+  }
+
   const handleSignOut = async () => {
     await signOut()
     setDropdownOpen(false)
@@ -127,6 +185,7 @@ export default function Header() {
         <Link href="/" className="flex items-center gap-2 text-xl font-bold">
           <span className="text-2xl">🏐</span>
           <span>VolleyOn</span>
+          <span className="text-2xl">🏐</span>
         </Link>
 
         <div className="flex items-center gap-4">
@@ -167,7 +226,7 @@ export default function Header() {
                 </button>
 
                 {roomsOpen && (
-                  <div className="absolute right-0 z-[1001] mt-2 w-64 rounded-md border bg-white text-left shadow-lg">
+                  <div className="absolute right-0 z-[1001] mt-4 w-64 rounded-md border bg-white text-left shadow-lg">
                     <div className="border-b px-4 py-2">
                       <p className="text-sm font-semibold text-gray-900">Your rooms</p>
                     </div>
@@ -196,6 +255,25 @@ export default function Header() {
                         ))
                       )}
                     </div>
+                    <div className="border-t px-4 py-2">
+                      <p className="text-sm font-semibold text-gray-900">Direct chats</p>
+                    </div>
+                    <div className="max-h-72 overflow-y-auto py-1">
+                      {directChats.length === 0 ? (
+                        <p className="px-4 py-2 text-sm text-gray-500">No direct chats.</p>
+                      ) : (
+                        directChats.map((chat) => (
+                          <Link
+                            key={chat.id}
+                            href={`/chats/${chat.id}`}
+                            className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setRoomsOpen(false)}
+                          >
+                            <span className="truncate">{chat.other_user_name}</span>
+                          </Link>
+                        ))
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -208,7 +286,7 @@ export default function Header() {
                   <img
                     src={profilePhotoUrl}
                     alt="Profile"
-                    className="h-8 w-8 rounded-full object-cover"
+                    className="h-8 w-8 rounded-full object-cover grayscale"
                     onError={(e) => {
                       // Hide image and show icon if image fails to load
                       e.currentTarget.style.display = "none"
@@ -233,7 +311,7 @@ export default function Header() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 z-[1001] mt-2 w-48 rounded-md border bg-white text-left shadow-lg">
+                <div className="absolute right-0 z-[1001] mt-4 w-48 rounded-md border bg-white text-left shadow-lg">
                   <div className="flex flex-col py-1">
                     <div className="border-b px-4 py-2">
                       <p className="text-sm font-semibold text-gray-900">
