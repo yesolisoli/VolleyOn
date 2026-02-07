@@ -41,6 +41,9 @@ export default function PostsPage() {
   const [selectedTag, setSelectedTag] = useState<string>("All")
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [loading, setLoading] = useState(true)
+  const isGrassTag = selectedTag === "Grass"
+  const isBeachTag = selectedTag === "Beach"
+  const isIndoorTag = selectedTag === "Indoor"
 
   useEffect(() => {
     // Check if there's a tag in URL params
@@ -151,7 +154,21 @@ export default function PostsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div
+      className="w-full min-h-screen"
+      style={
+        isGrassTag || isBeachTag || isIndoorTag
+          ? {
+              backgroundColor: isGrassTag
+                ? "#6CA651"
+                : isBeachTag
+                  ? "#7AB2B2"
+                  : "#E5D9B6",
+            }
+          : undefined
+      }
+    >
+      <div className="mx-auto max-w-5xl py-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Posts</h1>
         <Link
@@ -273,6 +290,7 @@ export default function PostsPage() {
                  {selectedTag === "All" ? "No posts yet." : `No posts with tag #${selectedTag}.`}
                </div>
              )}
+      </div>
     </div>
   )
 }

@@ -65,7 +65,9 @@ export default function Home() {
             key={card.href}
             href={card.href}
             className={`group relative h-40 min-h-40 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
-              card.backgroundImage ? "bg-cover bg-center bg-no-repeat" : "p-6"
+              card.backgroundImage
+                ? "bg-cover bg-center bg-no-repeat"
+                : "p-6 transition-colors hover:bg-gray-50"
             }`}
             style={
               card.backgroundImage
@@ -101,9 +103,7 @@ export default function Home() {
                     <div className="flex h-10 w-10 items-center justify-center text-6xl font-semibold text-black">
                       <span aria-hidden="true">{card.icon}</span>
                     </div>
-                    <h3
-                      className={`text-4xl font-semibold text-gray-900 group-hover:text-slate-700 ${anton.className}`}
-                    >
+                    <h3 className={`text-4xl font-semibold text-gray-900 ${anton.className}`}>
                       {card.title}
                     </h3>
                   </div>

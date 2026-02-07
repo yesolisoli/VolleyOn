@@ -24,6 +24,7 @@ export default function Header() {
   const { session, loading, signOut } = useAuth()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [roomsOpen, setRoomsOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [nickname, setNickname] = useState<string | null>(null)
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null)
   const [rooms, setRooms] = useState<ChatRoom[]>([])
@@ -174,41 +175,220 @@ export default function Header() {
     await signOut()
     setDropdownOpen(false)
     setRoomsOpen(false)
+    setMenuOpen(false)
     router.push("/login")
   }
 
   const displayName = nickname || session?.user?.email || "User"
+  const menuLinks = [
+    { href: "/posts", label: "Posts" },
+    { href: "/games", label: "Games" },
+    { href: "/leagues", label: "Leagues" },
+    { href: "/chats", label: "Chats" },
+    { href: "/subs", label: "Subs" },
+    { href: "/profile", label: "Profile" },
+  ]
 
   return (
-    <header className="relative z-[1000] border-b bg-white">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between py-4">
-        <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-          <span className="text-2xl">🏐</span>
-          <span>VolleyOn</span>
-          <span className="text-2xl">🏐</span>
-        </Link>
+    <header className="relative z-[1000] border-b bg-white text-gray-900 shadow-sm">
+      <button
+        onClick={() => setMenuOpen(true)}
+        className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full border border-gray-200 p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-black"
+        aria-label="Open menu"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+      {menuOpen && (
+        <div className="fixed inset-0 z-[1002]">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="absolute left-0 top-0 h-full w-72 bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b px-4 py-4">
+              <div className="flex items-center gap-2 text-lg font-semibold">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-sm font-bold text-white">
+                  V
+                </span>
+                <span>VolleyOn</span>
+              </div>
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-black"
+                aria-label="Close menu"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="px-4 py-4">
+              <nav className="flex flex-col gap-2">
+                {menuLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+              <div className="mt-6 border-t pt-4">
+                {!loading && !session && (
+                  <div className="flex flex-col gap-2">
+                    <Link
+                      href="/login"
+                      onClick={() => setMenuOpen(false)}
+                      className="rounded-full border border-gray-200 px-4 py-2 text-center text-sm font-medium text-gray-700"
+                    >
+                      Sign in
+                    </Link>
+                    <Link
+                      href="/signup"
+                      onClick={() => setMenuOpen(false)}
+                      className="rounded-full bg-black px-4 py-2 text-center text-sm font-semibold text-white"
+                    >
+                      Get started
+                    </Link>
+                  </div>
+                )}
+                {!loading && session && (
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  >
+                    Sign out
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <nav className="relative mx-auto flex max-w-6xl items-center px-4 py-3">
+        <div className="flex w-full items-center gap-4">
+          <div className="flex flex-1 items-center gap-6">
+          <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-sm font-bold text-white">
+              V
+            </span>
+            <span className="tracking-wide">VolleyOn</span>
+          </Link>
 
-        <div className="flex items-center gap-4">
+          <div className="hidden items-center gap-2 lg:flex">
+            <div className="group flex w-72 items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-2 shadow-sm transition-colors hover:border-gray-300 hover:bg-white">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 text-gray-500 transition-colors group-hover:text-gray-700"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search posts, games..."
+                className="w-full bg-transparent text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none"
+              />
+            </div>
+            <div className="group flex w-40 items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-2 shadow-sm transition-colors hover:border-gray-300 hover:bg-white">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 text-gray-500 transition-colors group-hover:text-gray-700"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Location"
+                className="w-full bg-transparent text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none"
+              />
+            </div>
+            <button className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-white shadow-sm transition-colors hover:bg-gray-900">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </button>
+          </div>
+          </div>
+
+          <div className="flex items-center gap-3">
           {!loading && !session && (
             <>
-              <Link href="/login" className="rounded border px-3 py-1">
-                Login
+              <Link href="/login" className="text-sm font-semibold text-gray-700 hover:text-black">
+                Sign in
               </Link>
-              <Link href="/signup" className="rounded bg-black px-3 py-1 text-white">
-                Sign up
+              <Link
+                href="/signup"
+                className="rounded-full bg-black px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-gray-900"
+              >
+                Get started
               </Link>
             </>
           )}
 
           {!loading && session && (
             <div className="relative flex items-center gap-3" ref={dropdownRef}>
+              <Link
+                href="/posts/new"
+                className="hidden rounded-full bg-black px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-gray-900 md:inline-flex"
+              >
+                New post
+              </Link>
               <div className="relative">
                 <button
                   onClick={() => {
                     setRoomsOpen(!roomsOpen)
                     setDropdownOpen(false)
                   }}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition-colors hover:bg-gray-100 hover:text-black"
                   aria-label="Chat rooms"
                 >
                   <svg
@@ -226,7 +406,7 @@ export default function Header() {
                 </button>
 
                 {roomsOpen && (
-                  <div className="absolute right-0 z-[1001] mt-4 w-64 rounded-md border bg-white text-left shadow-lg">
+                  <div className="absolute right-0 z-[1001] mt-4 w-64 rounded-md border border-gray-200 bg-white text-left text-gray-900 shadow-lg">
                     <div className="border-b px-4 py-2">
                       <p className="text-sm font-semibold text-gray-900">Your rooms</p>
                     </div>
@@ -279,7 +459,7 @@ export default function Header() {
               </div>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 rounded-full border border-gray-300 p-1 hover:bg-gray-50"
+                className="flex items-center gap-2 rounded-full border border-gray-200 p-1 text-gray-600 transition-colors hover:bg-gray-100 hover:text-black"
                 aria-label="Account menu"
               >
                 {profilePhotoUrl ? (
@@ -311,7 +491,7 @@ export default function Header() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 z-[1001] mt-4 w-48 rounded-md border bg-white text-left shadow-lg">
+                <div className="absolute right-0 top-full z-[1001] mt-2 w-48 rounded-md border border-gray-200 bg-white text-left text-gray-900 shadow-lg">
                   <div className="flex flex-col py-1">
                     <div className="border-b px-4 py-2">
                       <p className="text-sm font-semibold text-gray-900">
@@ -336,6 +516,7 @@ export default function Header() {
               )}
             </div>
           )}
+          </div>
         </div>
       </nav>
     </header>
